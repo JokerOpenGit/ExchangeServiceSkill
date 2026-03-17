@@ -1,0 +1,4 @@
+config/exchange.config.json
+node_modules/
+references/
+npm-debug.log*
