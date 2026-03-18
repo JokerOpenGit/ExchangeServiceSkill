@@ -37,6 +37,7 @@ npm run verify-login
 - Any write operation requires explicit confirmation
 - Write commands require `--confirm true` (or `EXCHANGE_WRITE_CONFIRM=true`)
 - `--dry-run` is supported for write commands to preview SOAP body
+- `--insecure true` (if used) only relaxes TLS validation per request and does not change global Node TLS settings
 
 ## Config Model
 File: `config/exchange.config.json`
@@ -121,3 +122,5 @@ Send receipt verification:
 
 ## References
 - https://learn.microsoft.com/en-us/exchange/client-developer/web-service-reference/ews-operations-in-exchange
+## Github
+- https://github.com/JokerOpenGit/ExchangeServiceSkill

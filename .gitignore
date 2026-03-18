@@ -1,4 +1,5 @@
 config/exchange.config.json
 node_modules/
 references/
+HANDOFF.md
 npm-debug.log*

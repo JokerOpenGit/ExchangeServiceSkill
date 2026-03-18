@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { createRequire } from 'node:module';
+import { Agent } from 'undici';
 
 const require = createRequire(import.meta.url);
 const httpntlm = require('httpntlm');
@@ -17,10 +18,14 @@ function splitIdentity(identity, domainOverride) {
   return { username: identity, domain: domainOverride || '' };
 }
 
-function maybeAllowInsecure(insecure) {
-  if (insecure) {
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  }
+const insecureDispatcher = new Agent({
+  connect: {
+    rejectUnauthorized: false,
+  },
+});
+
+function getDispatcher(insecure) {
+  return insecure ? insecureDispatcher : undefined;
 }
 
 function ensureSuccess(resp, operationName) {
@@ -78,11 +83,11 @@ export async function ewsGet({ url, username, password, authMode, domain, insecu
   const mode = String(authMode || 'ntlm').toLowerCase();
 
   if (mode === 'basic') {
-    maybeAllowInsecure(insecure);
     const token = Buffer.from(`${username}:${password}`, 'utf8').toString('base64');
     const resp = await fetch(url, {
       method: 'GET',
       headers: { Authorization: `Basic ${token}` },
+      dispatcher: getDispatcher(insecure),
     });
     const body = await resp.text();
     return ensureSuccess(normalizeResponse(resp.status, Object.fromEntries(resp.headers.entries()), body), 'EWS GET');
@@ -115,7 +120,6 @@ export async function ewsPostSoap({
   };
 
   if (mode === 'basic') {
-    maybeAllowInsecure(insecure);
     const token = Buffer.from(`${username}:${password}`, 'utf8').toString('base64');
     const resp = await fetch(url, {
       method: 'POST',
@@ -124,6 +128,7 @@ export async function ewsPostSoap({
         Authorization: `Basic ${token}`,
       },
       body: soapBody,
+      dispatcher: getDispatcher(insecure),
     });
     const body = await resp.text();
     return ensureSuccess(normalizeResponse(resp.status, Object.fromEntries(resp.headers.entries()), body), 'EWS SOAP POST');
