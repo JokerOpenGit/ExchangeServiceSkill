@@ -2,5 +2,5 @@ config/exchange.config.json
 node_modules/
 references/
 HANDOFF.md
-
+.gitignore
 npm-debug.log*
